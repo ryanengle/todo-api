@@ -27,7 +27,7 @@ app.get('/todos', function(req, res) {
 
 // HTTP method: GET /todos/:id
 app.get('/todos/:id', function(req, res) {    
-    res.send('Asking for ToDo with id of ' + req.params.id)
+    //res.send('Asking for ToDo with id of ' + req.params.id)
     var todoId = parseInt(req.params.id);
     var matchedTodo;
     
