@@ -31,7 +31,23 @@ app.use(bodyParser.json());
 
 // HTTP method: GET /todos
 app.get('/todos', function(req, res) {    
-    res.json(todos); // converts todos to JSON and sends back to caller    
+    // Get request query params
+    var queryParams = req.query;
+    // make a copy of the todos
+    var filteredTodos = todos; 
+    
+    // perform filtering
+    if (queryParams.hasOwnProperty('completed') && 
+        queryParams.completed === 'true') {
+        filteredTodos = _.where(filteredTodos, {completed: true});
+    } else if (queryParams.hasOwnProperty('completed') && 
+               queryParams.completed === 'false') {
+        filteredTodos = _.where(filteredTodos, {completed: false});
+    }    
+    
+    // converts (filtered)todos to JSON and sends back to caller
+    res.json(filteredTodos);    
+     
 });
 
 // HTTP method: GET /todos/:id
