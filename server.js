@@ -80,6 +80,40 @@ app.delete('/todos/:id', function(req, res) {
 
 });
 
+// HTTP method: PUT /todos/:id
+app.put('/todos/:id', function(req, res) {
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoId});
+    
+    // Check if the object exists
+    if( !matchedTodo ){
+        return res.status(404).send();
+    }   
+    
+    // Perform validation on completed attribute
+    var body = _.pick( req.body, 'description', 'completed');
+    var validAttributes = {};
+    // Validate attribute
+    if ( body.hasOwnProperty('completed') && _.isBoolean(body.completed) ){
+        validAttributes.completed = body.completed;
+    } else if ( body.hasOwnProperty('completed') ) {
+        // Has the property, but invalid
+        return res.status(400).send();
+    } 
+    // Perform validation on description attribute
+    if ( body.hasOwnProperty('description') && _.isString(body.description) &&
+        body.description.trim().length > 0 ){
+        validAttributes.description = body.description;
+    } else if ( body.hasOwnProperty('description') ) {
+        // Has the property, but invalid
+        return res.status(400).send();
+    } 
+    
+    // Perform the update
+    matchedTodo = _.extend(matchedTodo, validAttributes);   
+    res.json(matchedTodo);
+    
+});
 
 
 // listen
