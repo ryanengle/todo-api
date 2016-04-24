@@ -66,7 +66,20 @@ app.post('/todos', function(req, res) {
     res.json(body);
 });
 
-// HTTP method: POST ?? 
+// HTTP method: DELETE /todos/:id
+app.delete('/todos/:id', function(req, res) {
+    var todoId = parseInt(req.params.id, 10);
+    var matchedTodo = _.findWhere(todos, {id: todoId});
+    
+    if (!matchedTodo) {
+        res.status(404).json({"error": "no todo found with that id"});
+    } else {
+        todos = _.without(todos, matchedTodo);
+        res.json(matchedTodo); // sets status to 200
+    }
+
+});
+
 
 
 // listen
