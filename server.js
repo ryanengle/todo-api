@@ -2,26 +2,9 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var _ = require('underscore');
+var db = require('./db.js');
 var PORT = process.env.PORT || 5000;
-// hard-coded todos
-// var todos = [{
-//     id: 1,  // id for database (future)
-//     description: 'Celebrate Kristen\'s new job',
-//     completed: false
-// }, {
-//     id: 2,
-//     description: 'Fix shower door',
-//     completed: false
-// }, {
-//     id: 3,
-//     description: 'Secure tree',
-//     complete: true
-// }];
 
-// // simple get request
-// app.get('/', function(req, res) {
-//     res.send('Todo API root');
-// });
 var todos = [];
 var todoNextId = 1;
 
@@ -76,18 +59,26 @@ app.get('/todos/:id', function(req, res) {
 app.post('/todos', function(req, res) {
     // via body-parser and underscore
     var body = _.pick( req.body, 'description', 'completed');
+
+    db.todo.create(body).then(function (todo) {
+        // on success
+        res.json(todo.toJSON());
+    }, function (e) {
+        // on error
+        res.status(400).json(e);        
+    });
+                
+    // if ( !(_.isBoolean(body.completed)) || !(_.isString(body.description)) ||
+    //     body.description.trim().length === 0 ) {
+    //     return res.status(400).send();
+    // }
     
-    if ( !(_.isBoolean(body.completed)) || !(_.isString(body.description)) ||
-        body.description.trim().length === 0 ) {
-        return res.status(400).send();
-    }
+    // body.description = body.description.trim();
     
-    body.description = body.description.trim();
+    // body.id = todoNextId++;
+    // todos.push(body);
     
-    body.id = todoNextId++;
-    todos.push(body);
-    
-    res.json(body);
+    // res.json(body);
 });
 
 // HTTP method: DELETE /todos/:id
@@ -139,8 +130,10 @@ app.put('/todos/:id', function(req, res) {
     
 });
 
-
-// listen
-app.listen(PORT, function() {
-    console.log('Express listening on port ' + PORT);
+db.sequelize.sync().then(function () {
+    // listen
+    app.listen(PORT, function() {
+        console.log('Express listening on port ' + PORT);
+    });
 });
+
