@@ -45,14 +45,17 @@ app.get('/todos', function(req, res) {
 app.get('/todos/:id', function(req, res) {
     // string and base
     var todoId = parseInt(req.params.id, 10);
-    var matchedTodo = _.findWhere(todos, {id: todoId});
-   
-    // undefined is false
-    if (matchedTodo) {
-        res.json(matchedTodo);
-    } else {    
-        res.status(404).send();        
-    }
+    
+    db.todo.findById(todoId).then( function(todo) {
+       if (!!todo) { // !! convert object to boolean true or false, only runs if there is a todo item
+            res.json(todo.toJSON());           
+       } else {
+           res.status(404).send();
+       } 
+    }, function (e) {
+        res.status(500).send();        
+    });
+        
 });
 
 // HTTP method: POST /todos (all todos)
