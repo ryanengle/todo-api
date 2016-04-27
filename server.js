@@ -1,10 +1,10 @@
 var express = require('express');
 var bodyParser = require('body-parser');
-var app = express();
 var _ = require('underscore');
 var db = require('./db.js');
-var PORT = process.env.PORT || 5000;
 
+var app = express();
+var PORT = process.env.PORT || 5000;
 var todos = [];
 var todoNextId = 1;
 
@@ -141,14 +141,14 @@ app.post('/users', function(req, res) {
     
     db.user.create(body).then( function(user){
         // promise returned success
-        res.json(user.toJSON()); 
+        res.json(user.toPublicJSON()); 
     }, function(e) {
         // promise returned failue
         res.status(400).json(e);
     });
 });
 
-
+// {force: true} in sync() recreates DB
 db.sequelize.sync().then(function () {
     // listen
     app.listen(PORT, function() {

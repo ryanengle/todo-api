@@ -3,7 +3,8 @@ var sequelize = new Sequelize(undefined, undefined, undefined, {
     'dialect': 'sqlite',  // type of database
     // storage location
     'storage': __dirname + '/data/dev-todo-api.sqlite'
-    // will fail if directory does not exist, thus use .keep for git 
+    // will fail if directory does not exist, thus use .keep for git
+    
 });
 
 var db = {};
