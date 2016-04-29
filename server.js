@@ -154,10 +154,16 @@ app.post('/users/login', function(req, res) {
    var body = _.pick(req.body, 'email', 'password');
    
    db.user.authenticate(body).then( function (user) {
-       // promise returns success       
-       res.json(user.toPublicJSON());
+       // promise returned success              
+       var token =user.generateToken('authentication');
+       if (token) {
+           res.header('Auth', token).json(user.toPublicJSON());    
+       } else {
+           res.status(401).send();
+       }
+       
    }, function (e) {
-       // promise returns failure       
+       // promise returned failure       
        res.status(401).send();  // authentication is possible, but failed       
    });
 
