@@ -18,7 +18,9 @@ app.use(bodyParser.json());
 app.get('/todos', middleware.requireAuthentication, function(req, res) {    
     // Get request query params
     var query = req.query;
-    var where = {};
+    var where = {
+        userId: req.user.get('id')
+    };
     
     if (query.hasOwnProperty('completed') && query.completed === 'true') {
         where.completed = true;
@@ -47,7 +49,12 @@ app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
     // string and base
     var todoId = parseInt(req.params.id, 10);
     
-    db.todo.findById(todoId).then( function(todo) {
+    db.todo.findOne({
+        where: {
+            id: todoId,
+            userId: req.user.get('id')
+        }
+    }).then( function(todo) {
        // promise returned success
        if (!!todo) { // !! convert object to boolean true or false, only runs if there is a todo item
             res.json(todo.toJSON());           
@@ -87,7 +94,8 @@ app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
     
     db.todo.destroy({
         where: {
-            id: todoId
+            id: todoId,
+            userId: req.user.get('id')
         }
     }).then( function (numRowsDeleted) {
         // promise returned success
@@ -102,7 +110,6 @@ app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
         // promise returned failure
         res.status(500).send(); // internal server error        
     });  
-
 });
 
 // HTTP method: PUT /todos/:id (Update)
@@ -120,7 +127,12 @@ app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
         attributes.description = body.description;
     } 
     
-    db.todo.findById(todoId).then( function(todo) {
+    db.todo.findOne({
+        where: {
+            id: todoId,
+            userId: req.user.get('id')
+        }
+    }).then( function(todo) {
         // findById() promise returns success
         if (todo) {
             // chaining promises begins here (next then)
