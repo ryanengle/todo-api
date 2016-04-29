@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var bcrypt = require('bcrypt');
+var middleware = require('./middleware.js')(db);// pass in db
 
 var app = express();
 var PORT = process.env.PORT || 5000;
@@ -13,8 +14,8 @@ var todoNextId = 1;
 // can now access json request through req.body 
 app.use(bodyParser.json());
 
-// HTTP method: GET /todos
-app.get('/todos', function(req, res) {    
+// HTTP method: GET /todos?completed=false&q=work
+app.get('/todos', middleware.requireAuthentication, function(req, res) {    
     // Get request query params
     var query = req.query;
     var where = {};
@@ -42,7 +43,7 @@ app.get('/todos', function(req, res) {
 });
 
 // HTTP method: GET /todos/:id
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
     // string and base
     var todoId = parseInt(req.params.id, 10);
     
@@ -60,8 +61,8 @@ app.get('/todos/:id', function(req, res) {
         
 });
 
-// HTTP method: POST /todos (all todos)
-app.post('/todos', function(req, res) {
+// HTTP method: POST /todos (add a todo)
+app.post('/todos', middleware.requireAuthentication, function(req, res) {
     // via body-parser and underscore
     var body = _.pick( req.body, 'description', 'completed');
 
@@ -76,7 +77,7 @@ app.post('/todos', function(req, res) {
 });
 
 // HTTP method: DELETE /todos/:id
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
     var todoId = parseInt(req.params.id, 10);
     
     db.todo.destroy({
@@ -99,8 +100,8 @@ app.delete('/todos/:id', function(req, res) {
 
 });
 
-// HTTP method: PUT /todos/:id
-app.put('/todos/:id', function(req, res) {
+// HTTP method: PUT /todos/:id (Update)
+app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
     var todoId = parseInt(req.params.id, 10);    
     var body = _.pick( req.body, 'description', 'completed');
     var attributes = {};
