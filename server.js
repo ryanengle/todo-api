@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
+var bcrypt = require('bcrypt');
 
 var app = express();
 var PORT = process.env.PORT || 5000;
@@ -146,6 +147,20 @@ app.post('/users', function(req, res) {
         // promise returned failue
         res.status(400).json(e);
     });
+});
+
+// POST /users/login
+app.post('/users/login', function(req, res) {
+   var body = _.pick(req.body, 'email', 'password');
+   
+   db.user.authenticate(body).then( function (user) {
+       // promise returns success       
+       res.json(user.toPublicJSON());
+   }, function (e) {
+       // promise returns failure       
+       res.status(401).send();  // authentication is possible, but failed       
+   });
+
 });
 
 // {force: true} in sync() recreates DB

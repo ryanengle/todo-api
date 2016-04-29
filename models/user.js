@@ -2,7 +2,7 @@ var bcrypt = require('bcrypt');
 var _ = require('underscore');
 
 module.exports = function(sequelize, DataTypes){
-    return sequelize.define('user', {
+    var user = sequelize.define('user', {
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -44,6 +44,39 @@ module.exports = function(sequelize, DataTypes){
                 }
             }
         },
+        classMethods: {
+            authenticate: function (body) {
+                // return a promise
+                return new Promise( function (resolve, reject) {
+                   // quick validation                   
+                   if (typeof body.email !== 'string' || typeof body.password !== 'string'){                       
+                       return reject(); // do not proceed
+                   }                   
+                   
+                   // Find user email in DB
+                   user.findOne( {
+                       where: {
+                           email : body.email // equal
+                       }
+                   }).then( function (user){
+                       // promise returned success                       
+                       if (!user) {                           
+                           return reject(); // do not proceed
+                       }       
+                       // User found, now check password (could merge this into previous check)       
+                       if (!bcrypt.compareSync (body.password, user.get('password_hash'))) {                           
+                           return reject(); // do not proceed
+                       }
+                       
+                       // User and password is authorized
+                       resolve(user);                           
+                   }, function (e) {
+                       // promise returned failure                       
+                       reject(e);
+                   });                                       
+                });
+            }
+        },
         instanceMethods: {
             toPublicJSON: function () {
                 var json = this.toJSON(); // this refers to instance
@@ -51,4 +84,5 @@ module.exports = function(sequelize, DataTypes){
             }
         }
     });
+    return user;
 };
